@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "4000:4000"
+    volumes:
+      - .:/app
+      - go-mod-cache:/go/pkg/mod
+    environment:
+      - APP_HOST=0.0.0.0
+      - APP_PORT=4000
+      - DB_HOST=mysql
+      - DB_USER=root
+      - DB_PASSWORD=password
+      - DB_NAME=gochat
+      - DB_PORT=3306
+    depends_on:
+      - mysql
+    networks:
+      - gochat-network
+
+  mysql:
+    image: mysql:latest
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+      - MYSQL_DATABASE=gochat
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - gochat-network
+
+volumes:
+  go-mod-cache:
+  mysql-data:
+
+networks:
+  gochat-network:
+    driver: bridge
