@@ -29,7 +29,7 @@ func SetupDatabase() {
 
 	DB.Logger.LogMode(logger.Info)
 
-	err = DB.AutoMigrate(&models.User{})
+	err = DB.AutoMigrate(&models.User{}, &models.UserSession{})
 	if err != nil {
 		log.Println("Error migrating models:", err)
 		panic(err)
