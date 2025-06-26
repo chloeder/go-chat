@@ -2,3 +2,4 @@
 docker-compose.prod.yml
 Dockerfile
 tmp/
+.air.toml

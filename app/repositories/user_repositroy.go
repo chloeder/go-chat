@@ -14,6 +14,21 @@ func CreateUserSession(ctx *fiber.Ctx, userSession *models.UserSession) error {
 	return database.DB.Create(userSession).Error
 }
 
+func DeleteUserSessionByToken(ctx *fiber.Ctx, token string) error {
+	return database.DB.Where("token = ?", token).Delete(&models.UserSession{}).Error
+}
+
+func FindUserSessionByToken(ctx *fiber.Ctx, token string) (*models.UserSession, error) {
+	userSession := new(models.UserSession)
+
+	err := database.DB.Where("token = ?", token).First(userSession).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return userSession, nil
+}
+
 func FindUserByUsername(ctx *fiber.Ctx, username string) (*models.User, error) {
 	user := new(models.User)
 
