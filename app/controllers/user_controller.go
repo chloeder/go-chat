@@ -143,3 +143,19 @@ func Login(ctx *fiber.Ctx) error {
 		"data":    loginResponse,
 	})
 }
+
+func Logout(ctx *fiber.Ctx) error {
+	token := ctx.Get("Authorization")
+
+	err := repositories.DeleteUserSessionByToken(ctx, token)
+	if err != nil {
+		log.Println("Error deleting user session:", err)
+		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": "Error deleting user session",
+		})
+	}
+	
+	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
+		"message": "User logged out successfully",
+	})
+}
