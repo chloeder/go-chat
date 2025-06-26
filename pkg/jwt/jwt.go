@@ -18,18 +18,18 @@ type ClaimToken struct {
 
 var matTypeToken = map[string]time.Duration{
 	"token":   3 * time.Hour,
-	"refresh": 72 * time.Hour,
+	"refresh_token": 72 * time.Hour,
 }
 
 var jwtSecret = env.GetEnv("JWT_SECRET", "secret")
 
-func GenerateToken(ctx context.Context, username string, fullName string, typeToken string) (string, error) {
+func GenerateToken(ctx context.Context, username string, fullName string, typeToken string, now time.Time) (string, error) {
 	claims := ClaimToken{
 		Username: username,
 		FullName: fullName,
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(matTypeToken[typeToken])),
-			IssuedAt:  jwt.NewNumericDate(time.Now()),
+			ExpiresAt: jwt.NewNumericDate(now.Add(matTypeToken[typeToken])),
+			IssuedAt:  jwt.NewNumericDate(now),
 			Issuer:    "go-chat",
 		},
 	}
