@@ -44,7 +44,7 @@ func Register(ctx *fiber.Ctx) error {
 		Password: string(hashPassword),
 	}
 
-	err = repositories.CreateUser(ctx, &userModel)
+	err = repositories.CreateUser(ctx.Context(), &userModel)
 	if err != nil {
 		log.Println("Error creating user:", err)
 		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -77,7 +77,7 @@ func Login(ctx *fiber.Ctx) error {
 		})
 	}
 
-	userModel, err := repositories.FindUserByUsername(ctx, loginRequest.Username)
+	userModel, err := repositories.FindUserByUsername(ctx.Context(), loginRequest.Username)
 	if err != nil {
 		log.Println("Error finding user:", err)
 		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -99,7 +99,8 @@ func Login(ctx *fiber.Ctx) error {
 		})
 	}
 
-	token, err := jwt.GenerateToken(ctx.Context(), userModel.Username, userModel.FullName, "token")
+	now := time.Now()
+	token, err := jwt.GenerateToken(ctx.Context(), userModel.Username, userModel.FullName, "token", now)
 	if err != nil {
 		log.Println("Error generating token:", err)
 		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -107,7 +108,7 @@ func Login(ctx *fiber.Ctx) error {
 		})
 	}
 
-	refreshToken, err := jwt.GenerateToken(ctx.Context(), userModel.Username, userModel.FullName, "refresh_token")
+	refreshToken, err := jwt.GenerateToken(ctx.Context(), userModel.Username, userModel.FullName, "refresh_token", now)
 	if err != nil {
 		log.Println("Error generating refresh token:", err)
 		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -119,11 +120,11 @@ func Login(ctx *fiber.Ctx) error {
 		UserID:              userModel.ID,
 		Token:               token,
 		RefreshToken:        refreshToken,
-		TokenExpired:        time.Now().Add(time.Hour * 3),
-		RefreshTokenExpired: time.Now().Add(time.Hour * 24),
+		TokenExpired:        now.Add(time.Hour * 3),
+		RefreshTokenExpired: now.Add(time.Hour * 24),
 	}
 
-	err = repositories.CreateUserSession(ctx, &userSession)
+	err = repositories.CreateUserSession(ctx.Context(), &userSession)
 	if err != nil {
 		log.Println("Error creating user session:", err)
 		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -147,7 +148,7 @@ func Login(ctx *fiber.Ctx) error {
 func Logout(ctx *fiber.Ctx) error {
 	token := ctx.Get("Authorization")
 
-	err := repositories.DeleteUserSessionByToken(ctx, token)
+	err := repositories.DeleteUserSessionByToken(ctx.Context(), token)
 	if err != nil {
 		log.Println("Error deleting user session:", err)
 		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -157,5 +158,33 @@ func Logout(ctx *fiber.Ctx) error {
 	
 	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
 		"message": "User logged out successfully",
+	})
+}
+
+func RefreshToken(ctx *fiber.Ctx) error {
+	now := time.Now()
+	username := ctx.Locals("username").(string)
+	fullName := ctx.Locals("full_name").(string)
+	refreshToken := ctx.Get("Authorization")
+
+	token, err := jwt.GenerateToken(ctx.Context(), username, fullName, "token", now)
+	if err != nil {
+		log.Println("Error generating token:", err)
+		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": "Error generating token",
+		})
+	}
+
+	err = repositories.UpdateUserSessionToken(ctx.Context(), token, refreshToken)
+	if err != nil {
+		log.Println("Error updating user session token:", err)
+		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": "Error updating user session token",
+		})
+	}
+	
+	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
+		"message": "Token refreshed successfully",
+		"data":    token,
 	})
 }

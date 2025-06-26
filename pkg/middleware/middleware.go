@@ -19,7 +19,7 @@ func MiddlewareValidateAuth(ctx *fiber.Ctx) error {
 		})
 	}
 
-	_, err := repositories.FindUserSessionByToken(ctx, auth)
+	_, err := repositories.FindUserSessionByToken(ctx.Context(), auth)
 	if err != nil {
 		log.Println("Unauthorized: User session not found")
 		return ctx.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
@@ -42,8 +42,39 @@ func MiddlewareValidateAuth(ctx *fiber.Ctx) error {
 		})
 	}
 
-	ctx.Set("username", claimToken.Username)
-	ctx.Set("full_name", claimToken.FullName)
+	ctx.Locals("username", claimToken.Username)
+	ctx.Locals("full_name", claimToken.FullName)
+
+	return ctx.Next()
+}
+
+func MiddlewareRefreshToken(ctx *fiber.Ctx) error {
+	auth := ctx.Get("Authorization")
+
+	if auth == "" {
+		log.Println("Unauthorized: No token provided")
+		return ctx.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"message": "Unauthorized",
+		})
+	}
+
+	claimToken, err := jwt.ValidateToken(ctx.Context(), auth)
+	if err != nil {
+		log.Println("Unauthorized: Invalid token", err)
+		return ctx.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"message": "Unauthorized",
+		})
+	}
+
+	if time.Now().Unix() > claimToken.ExpiresAt.Unix() {
+		log.Println("Unauthorized: Token expired")
+		return ctx.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"message": "Unauthorized",
+		})
+	}
+
+	ctx.Locals("username", claimToken.Username)
+	ctx.Locals("full_name", claimToken.FullName)
 
 	return ctx.Next()
 }
