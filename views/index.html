@@ -241,7 +241,7 @@
 
     // Function to fetch message history
     function fetchMessageHistory() {
-      fetch('/message/v1/history', {
+      fetch('/api/v1/message/history', {
         method: 'GET',
         headers: {
           'Authorization': `${sessionStorage.getItem('jwtToken')}` // Include JWT token for authorization

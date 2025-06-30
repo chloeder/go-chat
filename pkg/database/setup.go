@@ -1,11 +1,14 @@
 package database
 
 import (
+	"context"
 	"fmt"
 	"log"
 
 	"github.com/kooroshh/fiber-boostrap/app/models"
 	"github.com/kooroshh/fiber-boostrap/pkg/env"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -34,4 +37,20 @@ func SetupDatabase() {
 		log.Println("Error migrating models:", err)
 		panic(err)
 	}
+}
+
+func SetupMongoDB() {
+	uri := env.GetEnv("MONGODB_URL", "")
+	if uri == "" {
+		log.Fatal("MONGODB_URL is not set in the environment variables")
+	}
+	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
+	if err != nil {
+		panic(err)
+	}
+
+	coll := client.Database("go-chat").Collection("message_history")
+	MongoDB = coll
+
+	fmt.Println("MongoDB connected successfully")
 }
