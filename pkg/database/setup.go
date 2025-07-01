@@ -42,15 +42,17 @@ func SetupDatabase() {
 func SetupMongoDB() {
 	uri := env.GetEnv("MONGODB_URL", "")
 	if uri == "" {
-		log.Fatal("MONGODB_URL is not set in the environment variables")
+		log.Println("MONGODB_URL is not set in the environment variables")
+		return
 	}
 	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
 	if err != nil {
+		log.Println("Error connecting to MongoDB:", err)
 		panic(err)
 	}
 
 	coll := client.Database("go-chat").Collection("message_history")
 	MongoDB = coll
 
-	fmt.Println("MongoDB connected successfully")
+	log.Println("MongoDB connected successfully")
 }

@@ -53,6 +53,7 @@ func ValidateToken(ctx context.Context, token string) (*ClaimToken, error) {
 
 	jwtToken, err := jwt.ParseWithClaims(token, &ClaimToken{}, func(t *jwt.Token) (interface{}, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
+			log.Printf("unexpected signing method: %v", t.Header["alg"])
 			return nil, fmt.Errorf("unexpected signing method: %v", t.Header["alg"])
 		}
 
@@ -60,6 +61,7 @@ func ValidateToken(ctx context.Context, token string) (*ClaimToken, error) {
 	})
 
 	if err != nil {
+		log.Println("Error parsing token:", err)
 		return nil, err
 	}
 
@@ -67,5 +69,6 @@ func ValidateToken(ctx context.Context, token string) (*ClaimToken, error) {
 		return claimToken, nil
 	}
 
+	log.Println("Invalid token")
 	return nil, fmt.Errorf("invalid token")
 }
