@@ -53,7 +53,7 @@ func Register(ctx *fiber.Ctx) error {
 	}
 
 	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
-		"message": "User created successfully",
+		"message": "success",
 		"data":    userModel,
 	})
 }
@@ -140,7 +140,7 @@ func Login(ctx *fiber.Ctx) error {
 	}
 
 	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
-		"message": "User logged in successfully",
+		"message": "success",
 		"data":    loginResponse,
 	})
 }
@@ -155,9 +155,9 @@ func Logout(ctx *fiber.Ctx) error {
 			"message": "Error deleting user session",
 		})
 	}
-	
+
 	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
-		"message": "User logged out successfully",
+		"message": "success",
 	})
 }
 
@@ -182,9 +182,9 @@ func RefreshToken(ctx *fiber.Ctx) error {
 			"message": "Error updating user session token",
 		})
 	}
-	
+
 	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
-		"message": "Token refreshed successfully",
+		"message": "success",
 		"data":    token,
 	})
 }

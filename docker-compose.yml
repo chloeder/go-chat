@@ -7,12 +7,14 @@ services:
       dockerfile: Dockerfile.dev
     ports:
       - "4000:4000"
+      - "8080:8080"
     volumes:
       - .:/app
       - go-mod-cache:/go/pkg/mod
     environment:
       - APP_HOST=0.0.0.0
       - APP_PORT=4000
+      - APP_PORT_SOCKET=8080
       - DB_HOST=mysql
       - DB_USER=root
       - DB_PASSWORD=password
