@@ -1,6 +1,10 @@
 package env
 
-import "github.com/joho/godotenv"
+import (
+	"log"
+
+	"github.com/joho/godotenv"
+)
 
 var Env map[string]string
 
@@ -16,6 +20,7 @@ func SetupEnvFile() {
 	var err error
 	Env, err = godotenv.Read(envFile)
 	if err != nil {
+		log.Println("Error reading .env file:", err)
 		panic(err)
 	}
 }

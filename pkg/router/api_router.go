@@ -5,6 +5,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/limiter"
 	"github.com/kooroshh/fiber-boostrap/app/controllers"
 	"github.com/kooroshh/fiber-boostrap/pkg/middleware"
+	apmfiber "go.elastic.co/apm/module/apmfiber/v2"
 )
 
 type ApiRouter struct{}
@@ -16,8 +17,11 @@ func (h ApiRouter) InstallRouter(app *fiber.App) {
 			"message": "Hello from api",
 		})
 	})
-	apiV1Group := api.Group("/v1")
 
+	app.Use(apmfiber.Middleware())
+
+	apiV1Group := api.Group("/v1")
+	
 	userGroup := apiV1Group.Group("/user")
 	userGroup.Post("/register", controllers.Register)
 	userGroup.Post("/login", controllers.Login)
