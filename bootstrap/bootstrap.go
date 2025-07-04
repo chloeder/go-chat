@@ -14,6 +14,7 @@ import (
 	"github.com/kooroshh/fiber-boostrap/pkg/database"
 	"github.com/kooroshh/fiber-boostrap/pkg/env"
 	"github.com/kooroshh/fiber-boostrap/pkg/router"
+	"go.elastic.co/apm/module/apmfiber"
 )
 
 func NewApplication() *fiber.App {
@@ -26,6 +27,7 @@ func NewApplication() *fiber.App {
 	app := fiber.New(fiber.Config{Views: engine})
 	app.Use(recover.New())
 	app.Use(logger.New())
+	app.Use(apmfiber.Middleware())
 	app.Get("/dashboard", monitor.New())
 
 	go ws.ServerWSMessage(app)
